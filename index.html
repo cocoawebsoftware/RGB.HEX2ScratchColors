@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGB/HEX to Scratch Colors Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"],
+        input[type="color"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="color"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            padding: 8px;
+            cursor: pointer;
+            flex: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-convert {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-convert:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-convert:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .results {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .result-value {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn.copied {
+            background: #4caf50;
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .input-wrapper {
+                flex-wrap: wrap;
+            }
+
+            input[type="color"] {
+                width: 100%;
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 RGB/HEX to Scratch Colors</h1>
+        <p class="subtitle">Scratch MIT対応カラーコンバーター</p>
+
+        <div class="info-box">
+            💡 RGBまたはHEXからScratch Color（色相1～100、彩度、明度）に変換します
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('hex')">HEX入力</button>
+            <button class="tab" onclick="switchTab('rgb')">RGB入力</button>
+            <button class="tab" onclick="switchTab('picker')">カラーピッカー</button>
+        </div>
+
+        <!-- HEX Input Tab -->
+        <div id="hex" class="tab-content active">
+            <div class="input-group">
+                <label for="hexInput">HEXカラーコード</label>
+                <input type="text" id="hexInput" placeholder="#FF5733または FF5733" maxlength="7">
+                <div class="error" id="hexError"></div>
+            </div>
+        </div>
+
+        <!-- RGB Input Tab -->
+        <div id="rgb" class="tab-content">
+            <div class="input-group">
+                <label>RGBカラー</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 400;">R (0-255)</label>
+                        <input type="text" id="rInput" placeholder="255" inputmode="numeric">
+                        <div class="error" id="rError"></div>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 400;">G (0-255)</label>
+                        <input type="text" id="gInput" placeholder="128" inputmode="numeric">
+                        <div class="error" id="gError"></div>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 400;">B (0-255)</label>
+                        <input type="text" id="bInput" placeholder="0" inputmode="numeric">
+                        <div class="error" id="bError"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Picker Tab -->
+        <div id="picker" class="tab-content">
+            <div class="input-group">
+                <label for="colorPicker">カラーピッカー</label>
+                <div class="input-wrapper">
+                    <input type="color" id="colorPicker" value="#667eea">
+                    <input type="text" id="pickerDisplay" placeholder="#667eea" readonly style="cursor: not-allowed;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button class="btn-convert" onclick="convert()">変換する</button>
+            <button class="btn-clear" onclick="clearAll()">クリア</button>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <div style="margin-bottom: 15px;">
+                <div class="color-preview" id="colorPreview"></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">色相 (Hue)</div>
+                <div class="result-value">
+                    <span id="hueValue">0</span>
+                    <button class="copy-btn" onclick="copyToClipboard('hueValue')">Copy</button>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">彩度 (Saturation)</div>
+                <div class="result-value">
+                    <span id="saturationValue">0</span>
+                    <button class="copy-btn" onclick="copyToClipboard('saturationValue')">Copy</button>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">明度 (Lightness)</div>
+                <div class="result-value">
+                    <span id="lightnessValue">0</span>
+                    <button class="copy-btn" onclick="copyToClipboard('lightnessValue')">Copy</button>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Scratchコード</div>
+                <div class="result-value">
+                    <span id="scratchCode">set color effect to 0</span>
+                    <button class="copy-btn" onclick="copyToClipboard('scratchCode')">Copy</button>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">HEXカラーコード</div>
+                <div class="result-value">
+                    <span id="hexOutput">#000000</span>
+                    <button class="copy-btn" onclick="copyToClipboard('hexOutput')">Copy</button>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">RGBカラー</div>
+                <div class="result-value">
+                    <span id="rgbOutput">rgb(0, 0, 0)</span>
+                    <button class="copy-btn" onclick="copyToClipboard('rgbOutput')">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Colors
+        const colorPicker = document.getElementById('colorPicker');
+        const pickerDisplay = document.getElementById('pickerDisplay');
+
+        colorPicker.addEventListener('input', (e) => {
+            pickerDisplay.value = e.target.value;
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Clear errors
+            clearErrors();
+        }
+
+        // Validation
+        function isValidHex(hex) {
+            return /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
+        }
+
+        function isValidRGB(r, g, b) {
+            const rNum = parseInt(r);
+            const gNum = parseInt(g);
+            const bNum = parseInt(b);
+            return !isNaN(rNum) && !isNaN(gNum) && !isNaN(bNum) &&
+                   rNum >= 0 && rNum <= 255 &&
+                   gNum >= 0 && gNum <= 255 &&
+                   bNum >= 0 && bNum <= 255;
+        }
+
+        // Conversion functions
+        function hexToRgb(hex) {
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(char => char + char).join('');
+            }
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return { r, g, b };
+        }
+
+        function rgbToHex(r, g, b) {
+            const toHex = (n) => {
+                const hex = n.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            };
+            return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            // Scratch uses 1-100 for hue
+            h = Math.round(h * 100) || 0;
+            s = Math.round(s * 100);
+            l = Math.round(l * 100);
+
+            return { h, s, l };
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error').forEach(error => {
+                error.classList.remove('show');
+            });
+        }
+
+        function convert() {
+            clearErrors();
+            let r, g, b;
+            const activeTab = document.querySelector('.tab-content.active');
+
+            try {
+                if (activeTab.id === 'hex') {
+                    const hex = document.getElementById('hexInput').value.trim();
+                    if (!hex) {
+                        showError('hexError', 'HEXカラーコードを入力してください');
+                        return;
+                    }
+                    if (!isValidHex(hex)) {
+                        showError('hexError', '有効なHEXカラーコードを入力してください (#RRGGBB)');
+                        return;
+                    }
+                    const rgb = hexToRgb(hex);
+                    r = rgb.r;
+                    g = rgb.g;
+                    b = rgb.b;
+                } else if (activeTab.id === 'rgb') {
+                    r = document.getElementById('rInput').value.trim();
+                    g = document.getElementById('gInput').value.trim();
+                    b = document.getElementById('bInput').value.trim();
+
+                    if (!r || !g || !b) {
+                        showError('rError', 'RGB値をすべて入力してください');
+                        return;
+                    }
+
+                    if (!isValidRGB(r, g, b)) {
+                        if (!isValidRGB(r, 0, 0)) showError('rError', '0～255の数値を入力してください');
+                        if (!isValidRGB(0, g, 0)) showError('gError', '0～255の数値を入力してください');
+                        if (!isValidRGB(0, 0, b)) showError('bError', '0～255の数値を入力してください');
+                        return;
+                    }
+
+                    r = parseInt(r);
+                    g = parseInt(g);
+                    b = parseInt(b);
+                } else if (activeTab.id === 'picker') {
+                    const hex = document.getElementById('colorPicker').value;
+                    const rgb = hexToRgb(hex);
+                    r = rgb.r;
+                    g = rgb.g;
+                    b = rgb.b;
+                }
+
+                // Display results
+                const { h, s, l } = rgbToHsl(r, g, b);
+                const hex = rgbToHex(r, g, b);
+
+                document.getElementById('hueValue').textContent = h;
+                document.getElementById('saturationValue').textContent = s;
+                document.getElementById('lightnessValue').textContent = l;
+                document.getElementById('scratchCode').textContent = `set color effect to ${h}`;
+                document.getElementById('hexOutput').textContent = hex;
+                document.getElementById('rgbOutput').textContent = `rgb(${r}, ${g}, ${b})`;
+                document.getElementById('colorPreview').style.backgroundColor = hex;
+
+                document.getElementById('results').classList.add('show');
+            } catch (error) {
+                showError('hexError', 'エラーが発生しました');
+            }
+        }
+
+        function showError(elementId, message) {
+            const error = document.getElementById(elementId);
+            error.textContent = message;
+            error.classList.add('show');
+        }
+
+        function clearAll() {
+            document.getElementById('hexInput').value = '';
+            document.getElementById('rInput').value = '';
+            document.getElementById('gInput').value = '';
+            document.getElementById('bInput').value = '';
+            document.getElementById('colorPicker').value = '#667eea';
+            document.getElementById('pickerDisplay').value = '#667eea';
+            document.getElementById('results').classList.remove('show');
+            clearErrors();
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('コピーに失敗しました:', err);
+            });
+        }
+
+        // Enter key to convert
+        document.getElementById('hexInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convert();
+        });
+        document.getElementById('rInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convert();
+        });
+        document.getElementById('gInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convert();
+        });
+        document.getElementById('bInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convert();
+        });
+    </script>
+</body>
+</html>
